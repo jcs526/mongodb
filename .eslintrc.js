@@ -2,14 +2,12 @@ module.exports = {
   env: {
     browser: true,
     commonjs: true,
-    es2021: true
+    es2021: true,
+    node: true
   },
   extends: "eslint:recommended",
   overrides: [
     {
-      env: {
-        node: true
-      },
       files: [
         ".eslintrc.{js,cjs}"
       ],
@@ -29,7 +27,7 @@ module.exports = {
     indent: ["error", 2, { SwitchCase: 1 }],
     "comma-spacing": ["error", { before: false, after: true }],
     "comma-dangle": ["error", "only-multiline"],
-    "max-len": ["error", { code: 80, ignoreUrls: true }],
+    "max-len": ["error", { code: 120, ignoreUrls: true }],
     "object-curly-spacing": ["error", "always"],
     "arrow-parens": ["error", "as-needed"],
     "prefer-const": "error",
