@@ -42,6 +42,19 @@ app.listen(port, function () {
 
 const getMongoData = async () => {
   // MongoDB 연결 문자열
+  const collection= await connectMongoDB(); // MongoDB에 연결
+
+  try {
+    // MongoDB에 연결\
+    const result = await collection.find().toArray();
+    console.log(result);
+  } catch (error) {
+    console.error("Error connecting to MongoDB", error);
+  }
+  
+};
+
+async function connectMongoDB() {
   const url = "mongodb://127.0.0.1:27017";
 
   // MongoDB 데이터베이스 이름
@@ -53,31 +66,9 @@ const getMongoData = async () => {
   //mongodb+srv://test:passw0rd@cluster0.fpm4bdi.mongodb.net/
   await client.connect(); // MongoDB에 연결
 
-  try {
-    // MongoDB에 연결
-    await client.connect();
-    console.log("Connected to MongoDB");
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
-    const result = await collection.find().toArray();
-    console.log(result);
-  } catch (error) {
-    console.error("Error connecting to MongoDB", error);
-  }
   
-};
+  const db = client.db(dbName);
+  const collection = db.collection(collectionName);
 
-async function connectDB(client, dbName) {
-  try {
-    // MongoDB에 연결
-    console.log("dd");
-    await client.connect();
-    console.log("Connected to MongoDB");
-
-    // 데이터베이스 가져오기
-    const db = client.db(dbName);
-    return db;
-  } catch (error) {
-    console.error("Error connecting to MongoDB", error);
-  }
+  return collection;
 }
