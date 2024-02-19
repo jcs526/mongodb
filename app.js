@@ -25,13 +25,18 @@ const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "access.log"), { flags: "a" });
 app.use(morgan("combined", { stream: accessLogStream }));
 
-app.get("/*", async (req, res) => {
+app.get("/", async (req, res) => {
+  const mongoData = await getMongoData();
+  res.send(mongoData);
+});
+
+app.get("/:id", async (req, res) => {
   debugLog(
     "Hello world"
   );
 
-  await getMongoData();
-  res.send("Hello world2");
+  const mongoData = await getMongoData(req.params.id);
+  res.send(mongoData);
 });
 
 app.listen(port, function () {
@@ -40,33 +45,45 @@ app.listen(port, function () {
   );
 });
 
-const getMongoData = async () => {
+const getMongoData = async (id = "") => {
   // MongoDB 연결 문자열
-  const collection= await connectMongoDB(); // MongoDB에 연결
+  const collection = await connectMongoDB(); // MongoDB에 연결
 
   try {
     // MongoDB에 연결\
-    const result = await collection.find().toArray();
-    console.log(result);
+    const query = {};
+    if (id) {
+      query._id = new ObjectId(id);
+    }
+    const result = await collection.find(query).toArray();
+    debugLog(query, result);
+    return result;
   } catch (error) {
     console.error("Error connecting to MongoDB", error);
+    return [];
   }
-  
+
 };
 
+/**
+  MODE=dev
+  DEBUG=app:debug
+  MONGO_URL = "mongodb://127.0.0.1:27017"
+  DB_NAME = "shop"
+  COLLECTION_NAME = "products"
+ */
 async function connectMongoDB() {
-  const url = "mongodb://127.0.0.1:27017";
+  const url = process.env.MONGO_URL;
 
   // MongoDB 데이터베이스 이름
-  const dbName = "shop";
-  const collectionName = "products";
+  const dbName = process.env.DB_NAME;
+  const collectionName = process.env.COLLECTION_NAME;
 
   // 연결할 클라이언트 생성
   const client = new MongoClient(url);
-  //mongodb+srv://test:passw0rd@cluster0.fpm4bdi.mongodb.net/
   await client.connect(); // MongoDB에 연결
 
-  
+
   const db = client.db(dbName);
   const collection = db.collection(collectionName);
 
