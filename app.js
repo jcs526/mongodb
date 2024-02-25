@@ -79,11 +79,12 @@ async function connectMongoDB() {
   if(!db){
     const url = process.env.MONGO_URL;
     // 연결할 클라이언트 생성
-    db = new MongoClient(url);
+    db = new MongoClient(url, { minPoolSize:10 });
+    
+    await db.connect(); // MongoDB에 연결
   }
   
  
-  await db.connect(); // MongoDB에 연결
 
   // MongoDB 데이터베이스 이름
   const dbName = process.env.DB_NAME;
