@@ -12,6 +12,7 @@ const fs = require("fs");
 const path = require("path");
 
 const { MongoClient, ObjectId } = require("mongodb");
+const connectMongoDB = require("./dbClient");
 
 let db;
 
@@ -41,6 +42,17 @@ app.get("/mongodb/:id", async (req, res) => {
   res.send(mongoData);
 });
 
+// 404 Not Found 처리
+app.use((req, res, next) => {
+  res.status(404).send("Sorry, that route does not exist.");
+});
+
+// 서버 내부 오류 처리
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send("Something broke!");
+});
+
 app.listen(port, function () {
   debugLog(
     "Express server has started on port " + port + ", Service List=>"
@@ -49,7 +61,7 @@ app.listen(port, function () {
 
 const getMongoData = async (id = "") => {
   // MongoDB 연결 문자열
-  const collection = await connectMongoDB(); // MongoDB에 연결
+  const collection = await connectCollection(); // MongoDB에 연결
 
   try {
     // MongoDB에 연결\
@@ -75,22 +87,10 @@ const getMongoData = async (id = "") => {
   COLLECTION_NAME = "products"
  */
 
-async function connectMongoDB() {
-  if(!db){
-    const url = process.env.MONGO_URL;
-    // 연결할 클라이언트 생성
-    db = new MongoClient(url, { minPoolSize:10 });
-    
-    await db.connect(); // MongoDB에 연결
-  }
-  
- 
+async function connectCollection() {
+  const database = await connectMongoDB();
 
-  // MongoDB 데이터베이스 이름
-  const dbName = process.env.DB_NAME;
   const collectionName = process.env.COLLECTION_NAME;
-
-  const database = db.db(dbName);
   const collection = database.collection(collectionName);
 
   return collection;
