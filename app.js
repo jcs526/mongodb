@@ -11,8 +11,10 @@ debugLog("This is a debug message");
 const fs = require("fs");
 const path = require("path");
 
-const { MongoClient, ObjectId } = require("mongodb");
+//eslint-disable-next-line
+const { MongoClient, ObjectId, Db, Collection } = require("mongodb");
 const connectMongoDB = require("./dbClient");
+
 
 let db;
 
@@ -34,16 +36,17 @@ app.get("/mongodb", async (req, res) => {
 });
 
 app.get("/mongodb/:id", async (req, res) => {
-  debugLog(
-    "Hello world"
-  );
-
   const mongoData = await getMongoData(req.params.id);
   res.send(mongoData);
 });
 
+app.post("/mongodb", async (req, res) => {
+  const mongoData = await insertMongoData(req.body);
+  res.send(mongoData);
+});
+
 // 404 Not Found 처리
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).send("Sorry, that route does not exist.");
 });
 
@@ -64,7 +67,6 @@ const getMongoData = async (id = "") => {
   const collection = await connectCollection(); // MongoDB에 연결
 
   try {
-    // MongoDB에 연결\
     const query = {};
     if (id) {
       query._id = new ObjectId(id);
@@ -78,6 +80,24 @@ const getMongoData = async (id = "") => {
   }
 
 };
+const insertMongoData = async data => {
+  // MongoDB 연결 문자열
+  const collection = await connectCollection(); // MongoDB에 연결
+
+  try {
+    const result = await collection.insertOne(data);
+    debugLog(data, result);
+    return result;
+  } catch (error) {
+    console.error("Error connecting to MongoDB", error);
+    return [];
+  }
+
+  console.log(
+    "data", data
+  );
+
+};
 
 /**
   MODE=dev
@@ -87,6 +107,10 @@ const getMongoData = async (id = "") => {
   COLLECTION_NAME = "products"
  */
 
+/**
+ * 
+ * @returns {Collection}
+ */
 async function connectCollection() {
   const database = await connectMongoDB();
 

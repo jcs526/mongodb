@@ -1,9 +1,13 @@
 // dbClient.js
-const { MongoClient } = require("mongodb");
+const { MongoClient, Db } = require("mongodb");
 require("dotenv").config();
 
 let db;
 
+/**
+ * 
+ * @returns {Db}
+ */
 async function connectMongoDB() {
   if (!db) {
     const url = process.env.MONGO_URL;
